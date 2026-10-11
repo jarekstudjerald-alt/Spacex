@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPACEHAB X | Space-Habitat Monitoring and Survival Planning</title>
+<style>
+  :root {
+    --bg: #070b14;
+    --bg-2: #0d1424;
+    --panel: #111a2e;
+    --panel-2: #16213a;
+    --border: #22304f;
+    --text: #e6edf7;
+    --muted: #8fa0bf;
+    --accent: #3fd0c9;
+    --accent-2: #5b8cff;
+    --ok: #3ddc97;
+    --warn: #f5b942;
+    --crit: #ff6b6b;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+  body {
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { max-width: 100%; display: block; }
+  .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 72px 0; position: relative; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 12px;
+  }
+  .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.1; letter-spacing: -.02em; font-weight: 700; }
+  h2 { font-size: clamp(26px, 3.4vw, 38px); line-height: 1.2; letter-spacing: -.01em; font-weight: 700; margin-bottom: 14px; }
+  h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  p { color: var(--muted); }
+  .section-head { max-width: 760px; margin-bottom: 40px; }
+  .section-head p { margin-top: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 14px;
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    cursor: pointer; transition: background .2s, border-color .2s, transform .2s;
+  }
+  .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: #04211f; border-color: var(--accent); }
+  .btn-primary:hover { background: #63e3dc; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--panel);
+    font-size: 12px; color: var(--muted);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; }
+  .dot.warn { background: var(--warn); }
+  .dot.crit { background: var(--crit); }
+  .dot.info { background: var(--accent-2); }
+  .card {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;
+  }
+  .card a, a.card { display: block; transition: border-color .2s, transform .2s; }
+  a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .icon {
+    width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+    background: rgba(63,208,201,.1); border: 1px solid rgba(63,208,201,.25); color: var(--accent);
+    margin-bottom: 16px; font-size: 18px;
+  }
+  .sample-tag {
+    font-size: 11px; padding: 3px 8px; border-radius: 6px;
+    background: rgba(91,140,255,.12); color: #a9c1ff; border: 1px solid rgba(91,140,255,.3);
+  }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(7,11,20,.88); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .04em; }
+  .logo {
+    width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #04211f; font-weight: 800; font-size: 14px;
+  }
+  .nav-links { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .menu-toggle {
+    display: none; background: none; border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 18px;
+  }
+
+  /* Hero */
+  .hero { padding: 64px 0 56px; overflow: hidden; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .hero-copy p.lead { font-size: 17px; margin: 20px 0 28px; max-width: 540px; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-glow {
+    position: absolute; width: 600px; height: 600px; border-radius: 50%; top: -160px; right: -120px;
+    background: radial-gradient(circle, rgba(63,208,201,.12), transparent 65%); pointer-events: none;
+  }
+  .viewport {
+    position: relative; border-radius: 18px; border: 1px solid var(--border);
+    background: radial-gradient(circle at 50% 40%, #13213d, #070b14 70%);
+    aspect-ratio: 4 / 3.3; overflow: hidden;
+  }
+  .viewport svg.habitat { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hud-tag {
+    position: absolute; top: 14px; left: 14px; font-size: 11px; color: var(--muted);
+    background: rgba(7,11,20,.7); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px;
+  }
+  .float-pill {
+    position: absolute; display: flex; align-items: center; gap: 8px; font-size: 12px;
+    background: rgba(17,26,46,.9); border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  }
+  .score-card {
+    position: absolute; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 14px;
+    background: rgba(17,26,46,.92); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px;
+  }
+  .score-ring { width: 52px; height: 52px; }
+  .score-ring text { fill: var(--text); font-size: 13px; font-weight: 700; }
+  .score-label { font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  .score-value { font-size: 14px; font-weight: 600; }
+
+  /* Telemetry strip */
+  .telemetry { padding: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg-2); }
+  .telemetry-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; flex-wrap: wrap; }
+  .monitors { display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 12px; flex: 1; min-width: 300px; }
+  .monitor { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--panel); }
+  .monitor-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .monitor-head strong { color: var(--text); }
+  .bar { height: 6px; border-radius: 4px; background: #1d2a46; margin: 8px 0 6px; overflow: hidden; }
+  .bar span { display: block; height: 100%; border-radius: 4px; background: var(--ok); }
+  .bar span.warn { background: var(--warn); }
+  .bar span.crit { background: var(--crit); }
+  .monitor-foot { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
+
+  /* Problem */
+  .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .problem-grid .card { display: flex; flex-direction: column; }
+  .problem-grid .card p { flex: 1; }
+  .tag-line { font-size: 12px; color: var(--warn); margin-top: 16px; display: flex; gap: 8px; align-items: center; }
+
+  /* Capabilities */
+  .cap-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+  .cap-head .section-head { margin-bottom: 0; }
+  .cap-head p.side { max-width: 420px; }
+  .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .bento .card { display: flex; flex-direction: column; }
+  .bento .card p { font-size: 14px; flex: 1; }
+  .bento .card .link-row { margin-top: 18px; font-size: 13px; color: var(--accent); display: flex; justify-content: space-between; }
+  .bento .featured { border-color: rgba(63,208,201,.45); box-shadow: 0 0 0 1px rgba(63,208,201,.15) inset; }
+
+  /* Digital twin */
+  .twin-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; margin-bottom: 32px; }
+  .console { border: 1px solid var(--border); border-radius: 18px; background: var(--bg-2); overflow: hidden; }
+  .console-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+  .console-top .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .console-top .btn { padding: 7px 12px; font-size: 12px; }
+  .console-body { display: grid; grid-template-columns: 360px 1fr; gap: 0; }
+  .controls { padding: 22px; border-right: 1px solid var(--border); }
+  .slider-block { margin-bottom: 22px; }
+  .slider-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+  .slider-head span:last-child { color: var(--accent); font-weight: 600; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .meter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .meter { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--panel); }
+  .meter small { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+  .meter .big { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .visual { padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+  .chain { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; align-items: stretch; }
+  .chain-node { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--panel); position: relative; }
+  .chain-node.root { border-color: rgba(255,107,107,.5); }
+  .chain-node small { font-size: 10px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  .chain-node h4 { font-size: 14px; margin: 4px 0 2px; }
+  .chain-node .delta { font-size: 13px; font-weight: 600; color: var(--crit); }
+  .chain-node .delta.good { color: var(--ok); }
+  .chain-node.root .delta { color: var(--crit); }
+  .chain-node:not(:last-child)::after {
+    content: "→"; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; z-index: 2;
+  }
+  .outcome { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--panel); }
+  .outcome .before-after { display: flex; gap: 12px; align-items: baseline; font-size: 14px; }
+  .outcome .before-after strong { font-size: 22px; }
+  .footnote { font-size: 12px; color: var(--muted); }
+
+  /* AI agents */
+  .agents { display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 20px; align-items: center; }
+  .agent-col { display: flex; flex-direction: column; gap: 16px; }
+  .agent { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; background: var(--panel); }
+  .agent-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .agent-name { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+  .agent p { font-size: 13px; }
+  .hub { border: 1px solid rgba(63,208,201,.4); border-radius: 18px; padding: 24px; background: linear-gradient(180deg, var(--panel-2), var(--bg-2)); }
+  .hub-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+  .directive { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: var(--panel); display: flex; gap: 12px; }
+  .directive .num { width: 26px; height: 26px; border-radius: 8px; background: rgba(63,208,201,.15); color: var(--accent); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .directive h4 { font-size: 14px; margin-bottom: 4px; }
+  .directive p { font-size: 13px; }
+  .hub-foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* Survival score */
+  .score-layout { display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: center; }
+  .factors { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+  .factor { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--panel); }
+  .factor-head { display: flex; justify-content: space-between; font-size: 13px; }
+  .factor-head span:last-child { font-weight: 700; color: var(--ok); }
+  .factor .bar { margin: 10px 0 8px; }
+  .factor small { font-size: 12px; color: var(--muted); }
+  .scenario { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .scenario div { border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; background: var(--bg-2); }
+  .scenario small { font-size: 11px; color: var(--muted); display: block; }
+  .scenario strong { font-size: 18px; }
+  .hud { position: relative; width: 100%; max-width: 360px; margin: 0 auto; }
+  .hud text { font-family: inherit; }
+
+  /* How it works */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .step { position: relative; }
+  .step .card { height: 100%; }
+  .step-num { font-size: 12px; letter-spacing: .12em; color: var(--accent); font-weight: 700; }
+  .step h3 { margin-top: 10px; }
+  .step p { font-size: 14px; }
+
+  /* Alerts & history */
+  .alerts-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+  .alerts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; font-weight: 600; }
+  .panel-title small { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .alert { border: 1px solid var(--border); border-left-width: 3px; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; background: var(--panel); }
+  .alert.crit { border-left-color: var(--crit); }
+  .alert.warn { border-left-color: var(--warn); }
+  .alert.info { border-left-color: var(--accent-2); }
+  .alert-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 6px; }
+  .alert-top .sev { font-weight: 700; letter-spacing: .06em; }
+  .alert-top .sev.crit { color: var(--crit); }
+  .alert-top .sev.warn { color: var(--warn); }
+  .alert-top .sev.info { color: #a9c1ff; }
+  .alert-top time { color: var(--muted); }
+  .alert p { font-size: 13px; color: var(--text); opacity: .9; }
+  .log-row { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .log-row:last-child { border-bottom: none; }
+  .log-row time { color: var(--muted); font-size: 12px; }
+  .log-row span { color: var(--text); opacity: .9; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filter-btn { font-size: 12px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+  .filter-btn.active { color: var(--text); border-color: var(--accent); background: rgba(63,208,201,.08); }
+
+  /* Mission data form */
+  .form-wrap { display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: start; }
+  .form-card { border: 1px solid var(--border); border-radius: 18px; padding: 28px; background: var(--panel); }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .field small { display: block; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .field input {
+    width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--bg-2); color: var(--text); font: inherit; font-size: 14px;
+  }
+  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(63,208,201,.15); }
+  .field .error-text { color: var(--crit); font-size: 12px; margin-top: 6px; display: none; }
+  .field.invalid input { border-color: var(--crit); }
+  .field.invalid .error-text { display: block; }
+  .status-box { margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-size: 13px; display: none; }
+  .status-box.show { display: block; }
+  .status-box.sending { background: rgba(91,140,255,.1); border: 1px solid rgba(91,140,255,.3); color: #cfdcff; }
+  .status-box.success { background: rgba(61,220,151,.08); border: 1px solid rgba(61,220,151,.3); color: #bff5dc; }
+  .status-box.error { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.3); color: #ffd1d1; }
+  .form-side ul { list-style: none; display: grid; gap: 12px; margin-top: 18px; }
+  .form-side li { border: 1px solid var(--border); border-radius: 10px; padding: 14px; background: var(--bg-2); font-size: 14px; }
+  .form-side li strong { display: block; margin-bottom: 2px; }
+  .form-side li span { color: var(--muted); font-size: 13px; }
+
+  /* CTA */
+  .cta { padding: 96px 0; text-align: center; border-top: 1px solid var(--border); background: radial-gradient(ellipse at 50% 0%, rgba(63,208,201,.1), transparent 60%); }
+  .cta h2 { max-width: 760px; margin: 0 auto 14px; }
+  .cta p { max-width: 640px; margin: 0 auto 28px; }
+  .cta .hero-actions { justify-content: center; }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 48px 0 28px; background: var(--bg-2); }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+  .footer-grid p { font-size: 13px; margin-top: 12px; max-width: 340px; }
+  .footer-grid h5 { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .footer-grid a { display: block; font-size: 14px; color: var(--text); opacity: .85; margin-bottom: 10px; }
+  .footer-grid a:hover { color: var(--accent); opacity: 1; }
+  .footer-bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); flex-wrap: wrap; gap: 10px; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .console-body { grid-template-columns: 1fr; }
+    .controls { border-right: none; border-bottom: 1px solid var(--border); }
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .monitors { grid-template-columns: repeat(2, 1fr); }
+    .agents { grid-template-columns: 1fr; }
+    .score-layout { grid-template-columns: 1fr; }
+    .problem-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 860px) {
+    .menu-toggle { display: block; }
+    .nav-links {
+      position: absolute; top: 72px; left: 0; right: 0; background: var(--bg-2);
+      flex-direction: column; gap: 0; border-bottom: 1px solid var(--border); display: none;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { padding: 14px 24px; border-top: 1px solid var(--border); }
+    .nav-right .pill { display: none; }
+    .hero-grid, .twin-intro, .form-wrap, .alerts-grid { grid-template-columns: 1fr; }
+    .chain { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .chain-node:not(:last-child)::after { display: none; }
+    .scenario { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    section { padding: 56px 0; }
+    .container { padding: 0 16px; }
+    .bento, .steps, .factors, .monitors { grid-template-columns: 1fr; }
+    .btn { width: 100%; }
+    .hero-actions { flex-direction: column; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .outcome { grid-template-columns: 1fr; }
+    .log-row { grid-template-columns: 1fr; gap: 4px; }
+    .console-top .btns { width: 100%; }
+    .console-top .btns .btn { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="container nav">
+    <a href="#overview" class="brand" aria-label="SPACEHAB X home">
+      <span class="logo">SX</span>
+      <span>SPACEHAB X</span>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#digital-twin">Digital Twin</a>
+      <a href="#ai-agents">AI Agents</a>
+      <a href="#survival-score">Survival Score</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#alerts">Alerts &amp; History</a>
+      <a href="#mission-data">Mission Data</a>
+    </nav>
+    <div class="nav-right">
+      <span class="pill"><span class="dot"></span> Simulated telemetry</span>
+      <a href="#dashboard" class="btn" style="padding:8px 14px;">Dashboard</a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 1. HERO ============ -->
+<section id="overview" class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Mission Intelligence Platform</span>
+      <h1>Survival Beyond Earth Starts Here.</h1>
+      <p class="lead">SPACEHAB X monitors water, oxygen, food, and energy reserves, detects emerging crises, and simulates their impacts so mission teams can act before a small fault becomes a mission-critical failure.</p>
+      <div class="hero-actions">
+        <a href="#dashboard" class="btn btn-primary">Open Mission Dashboard &rarr;</a>
+        <a href="#digital-twin" class="btn">Explore the Digital Twin</a>
+      </div>
+      <p class="footnote" style="margin-top:20px;">Displayed values are sample data for prototype purposes and are not live spacecraft sensor readings.</p>
+    </div>
+
+    <div class="viewport" aria-label="Orbital habitat digital twin viewport">
+      <svg class="habitat" viewBox="0 0 560 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#1d2b47" stroke-width="0.6"/>
+          </pattern>
+        </defs>
+        <rect width="560" height="420" fill="url(#grid)" opacity="0.6"/>
+        <circle cx="430" cy="90" r="46" fill="#1b3a6b" opacity="0.5"/>
+        <circle cx="430" cy="90" r="46" fill="none" stroke="#3b6fb8" stroke-width="1" opacity="0.6"/>
+        <ellipse cx="280" cy="230" rx="210" ry="60" fill="none" stroke="#2c4a7c" stroke-dasharray="4 6"/>
+        <rect x="200" y="190" width="160" height="70" rx="22" fill="#15243f" stroke="#3fd0c9" stroke-width="1.5"/>
+        <rect x="216" y="204" width="128" height="10" rx="5" fill="#0f1a2e"/>
+        <rect x="216" y="204" width="90" height="10" rx="5" fill="#3ddc97" opacity="0.8"/>
+        <rect x="150" y="200" width="44" height="50" rx="8" fill="#101b30" stroke="#5b8cff" stroke-width="1"/>
+        <rect x="366" y="200" width="44" height="50" rx="8" fill="#101b30" stroke="#5b8cff" stroke-width="1"/>
+        <line x1="150" y1="225" x2="112" y2="225" stroke="#5b8cff" stroke-width="2"/>
+        <line x1="410" y1="225" x2="448" y2="225" stroke="#5b8cff" stroke-width="2"/>
+        <rect x="60" y="205" width="52" height="40" fill="#1a2c4d" stroke="#5b8cff"/>
+        <rect x="448" y="205" width="52" height="40" fill="#1a2c4d" stroke="#5b8cff"/>
+        <line x1="56" y1="205" x2="112" y2="245" stroke="#2c4a7c" stroke-width="1"/>
+        <circle cx="280" cy="350" r="18" fill="#3fd0c9" opacity="0.15"/>
+        <circle cx="280" cy="350" r="4" fill="#3fd0c9"/>
+        <path d="M 40 130 L 40 110 L 60 110" fill="none" stroke="#3fd0c9" stroke-width="1.5"/>
+        <path d="M 520 130 L 520 110 L 500 110" fill="none" stroke="#3fd0c9" stroke-width="1.5"/>
+        <path d="M 40 300 L 40 320 L 60 320" fill="none" stroke="#3fd0c9" stroke-width="1.5"/>
+        <path d="M 520 300 L 520 320 L 500 320" fill="none" stroke="#3fd0c9" stroke-width="1.5"/>
+      </svg>
+      <span class="hud-tag">COORD: 180&deg; HORIZON &middot; ORBITAL-ALPHA</span>
+      <span class="float-pill" style="top:56px; right:14px;"><span class="dot"></span>WATER &middot; 74%</span>
+      <span class="float-pill" style="top:150px; left:14px;"><span class="dot"></span>OXYGEN &middot; 88%</span>
+      <span class="float-pill" style="bottom:110px; right:14px;"><span class="dot warn"></span>FOOD &middot; 61%</span>
+      <div class="score-card">
+        <svg class="score-ring" viewBox="0 0 52 52" aria-hidden="true">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="#1d2a46" stroke-width="5"/>
+          <circle cx="26" cy="26" r="21" fill="none" stroke="#3fd0c9" stroke-width="5" stroke-linecap="round" stroke-dasharray="132 132" transform="rotate(-90 26 26)" style="stroke-dasharray: 113 132"/>
+          <text x="26" y="31" text-anchor="middle">86</text>
+        </svg>
+        <div>
+          <div class="score-label">Survival Score</div>
+          <div class="score-value">Stable &middot; 86 / 100</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. TELEMETRY STRIP ============ -->
+<div class="telemetry" aria-label="Mission telemetry strip">
+  <div class="container telemetry-inner">
+    <span class="pill"><span class="dot"></span>Telemetry mode: Simulated &middot; Sample data</span>
+    <div class="monitors">
+      <a href="#dashboard" class="monitor" aria-label="Water monitor">
+        <div class="monitor-head"><span>Water</span><strong>74%</strong></div>
+        <div class="bar"><span style="width:74%"></span></div>
+        <div class="monitor-foot"><span>Reserve</span><span>1,480 L</span></div>
+      </a>
+      <a href="#dashboard" class="monitor" aria-label="Oxygen monitor">
+        <div class="monitor-head"><span>Oxygen</span><strong>88%</strong></div>
+        <div class="bar"><span style="width:88%"></span></div>
+        <div class="monitor-foot"><span>Partial pressure</span><span>21.1 kPa</span></div>
+      </a>
+      <a href="#dashboard" class="monitor" aria-label="Energy monitor">
+        <div class="monitor-head"><span>Energy</span><strong>69%</strong></div>
+        <div class="bar"><span class="warn" style="width:69%"></span></div>
+        <div class="monitor-foot"><span>Storage</span><span>412 kWh</span></div>
+      </a>
+      <a href="#crew-health" class="monitor" aria-label="Crew health monitor">
+        <div class="monitor-head"><span>Crew Health</span><strong>Nominal</strong></div>
+        <div class="bar"><span style="width:92%"></span></div>
+        <div class="monitor-foot"><span>Index</span><span>92 / 100</span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 3. PROBLEM STATEMENT ============ -->
+<section id="challenge">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">The Challenge</span>
+      <h2>Space Leaves No Room for Resource Failure.</h2>
+      <p>In deep space, biological and technical life-support loops are tightly linked. A change in water purification directly affects hydroponic crops, food yields, and crew wellbeing.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="card">
+        <div class="icon">&#9634;</div>
+        <h3>Finite &amp; Non-Renewable Stores</h3>
+        <p>Water, food, oxygen, and energy must last the full mission without resupply from Earth. Every fraction of a reserve directly sets how long the crew can survive.</p>
+        <div class="tag-line">&#9650; Reserves must be tracked continuously</div>
+      </div>
+      <div class="card">
+        <div class="icon">&#8635;</div>
+        <h3>Cascading Subsystem Risk</h3>
+        <p>A minor fault in a wastewater valve can reduce hydroponic water injection, which then lowers greenhouse yields, creates dietary deficits, and disrupts thermal dissipation.</p>
+        <div class="tag-line">&#9650; One fault can reach several subsystems</div>
+      </div>
+      <div class="card">
+        <div class="icon">&#9201;</div>
+        <h3>High-Stakes Decision Latency</h3>
+        <p>Without digital-twin simulations to test contingency plans, crews risk running recovery procedures that accelerate the very failure they are meant to prevent.</p>
+        <div class="tag-line">&#9650; Decisions need simulation support</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. CORE CAPABILITIES ============ -->
+<section id="capabilities" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="cap-head">
+      <div class="section-head">
+        <span class="eyebrow">Core Capabilities</span>
+        <h2>Everything Your Mission Needs to Stay Prepared.</h2>
+      </div>
+      <p class="side">Six connected capabilities cover the full loop from telemetry to corrective action, with each one linked to the workflow it supports.</p>
+    </div>
+    <div class="bento">
+      <a href="#dashboard" class="card">
+        <div class="icon">&#9638;</div>
+        <h3>Resource Monitoring</h3>
+        <p>Track water, food, oxygen, electrical reserves, and greenhouse crop production through a high-frequency, telemetry-synchronised dashboard.</p>
+        <div class="link-row"><span>Open dashboard</span><span>&rarr;</span></div>
+      </a>
+      <a href="#alerts" class="card">
+        <div class="icon">&#9888;</div>
+        <h3>Crisis Detection</h3>
+        <p>Identify anomalies, micro-leaks, purification deficits, and crop disease before they breach mission survivability limits.</p>
+        <div class="link-row"><span>View alerts</span><span>&rarr;</span></div>
+      </a>
+      <a href="#ai-agents" class="card">
+        <div class="icon">&#10070;</div>
+        <h3>AI Agent System</h3>
+        <p>Deploy specialised agents across hydrology, botany, biometrics, and power distribution to evaluate trade-offs between domains.</p>
+        <div class="link-row"><span>Meet the agents</span><span>&rarr;</span></div>
+      </a>
+      <a href="#impact" class="card">
+        <div class="icon">&#8644;</div>
+        <h3>Impact Analysis</h3>
+        <p>Map second- and third-order impacts of environmental closures, such as how conserving power today affects nutrition over the next 60 sols.</p>
+        <div class="link-row"><span>See impact chain</span><span>&rarr;</span></div>
+      </a>
+      <a href="#digital-twin" class="card featured">
+        <div class="icon">&#9673;</div>
+        <h3>Digital Twin Simulation <span class="sample-tag" style="margin-left:6px;">Featured</span></h3>
+        <p>Inject crises such as water filter degradation or solar flare blackouts into high-fidelity simulations before changing habitat controls.</p>
+        <div class="link-row"><span>Run a simulation</span><span>&rarr;</span></div>
+      </a>
+      <a href="#survival-plan" class="card">
+        <div class="icon">&#9998;</div>
+        <h3>Survival Plan Generator</h3>
+        <p>Convert simulated trade studies into step-by-step corrective protocols for flight controllers and habitat crew with minimal manual lag.</p>
+        <div class="link-row"><span>Generate a plan</span><span>&rarr;</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. DIGITAL TWIN ============ -->
+<section id="digital-twin" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="twin-intro">
+      <div>
+        <span class="eyebrow">Test Before It Happens</span>
+        <h2>Simulate the Crisis. Understand the Impact. Adapt the Plan.</h2>
+      </div>
+      <div>
+        <p>In deep space, isolated systems do not exist. Test cascading environmental shocks inside the SPACEHAB X digital twin before making physical changes to the habitat.</p>
+        <div class="hero-actions" style="margin-top:18px;">
+          <span class="pill">1&nbsp;&nbsp;Inject fault</span>
+          <span class="pill">&rarr;</span>
+          <span class="pill">2&nbsp;&nbsp;Observe cascade</span>
+          <span class="pill">&rarr;</span>
+          <span class="pill">3&nbsp;&nbsp;Adjust plan</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="console" id="dashboard">
+      <div class="console-top">
+        <span class="pill"><span class="dot info"></span>Interactive digital twin console &middot; Sample model</span>
+        <div class="btns">
+          <button class="btn" id="resetTwin">Reset scenario</button>
+          <a href="#survival-plan" class="btn btn-primary">Generate survival plan</a>
+        </div>
+      </div>
+      <div class="console-body">
+        <div class="controls">
+          <div class="slider-block">
+            <div class="slider-head"><span>Water delivery failure</span><span id="waterVal">0%</span></div>
+            <input type="range" id="waterSlider" min="0" max="60" value="0" aria-label="Water delivery failure percentage">
+          </div>
+          <div class="slider-block">
+            <div class="slider-head"><span>Solar flare blackout (hours)</span><span id="solarVal">0 h</span></div>
+            <input type="range" id="solarSlider" min="0" max="48" value="0" aria-label="Solar flare blackout hours">
+          </div>
+          <div class="slider-block">
+            <div class="slider-head"><span>Filter degradation</span><span id="filterVal">0%</span></div>
+            <input type="range" id="filterSlider" min="0" max="50" value="0" aria-label="Water filter degradation percentage">
+          </div>
+          <div class="meter-grid">
+            <div class="meter"><small>Hydroponic supply</small><div class="big" id="mHydro">100%</div></div>
+            <div class="meter"><small>Food reserves</small><div class="big" id="mFood">100%</div></div>
+            <div class="meter"><small>Crew stress</small><div class="big" id="mStress">Low</div></div>
+            <div class="meter"><small>Energy margin</small><div class="big" id="mEnergy">Stable</div></div>
+          </div>
+        </div>
+
+        <div class="visual">
+          <div>
+            <small class="footnote" style="letter-spacing:.1em;text-transform:uppercase;">Causal cascade chain</small>
+            <div class="chain" style="margin-top:12px;">
+              <div class="chain-node root">
+                <small>Root fault</small>
+                <h4 id="rootLabel">Baseline</h4>
+                <div class="delta" id="rootDelta">0%</div>
+              </div>
+              <div class="chain-node">
+                <small>Impact 01</small>
+                <h4>Hydroponic crops</h4>
+                <div class="delta" id="imp1">0% yield</div>
+              </div>
+              <div class="chain-node">
+                <small>Impact 02</small>
+                <h4>Food reserves</h4>
+                <div class="delta" id="imp2">0 days</div>
+              </div>
+              <div class="chain-node">
+                <small>Crew impact</small>
+                <h4>Crew stress index</h4>
+                <div class="delta" id="imp3">0% risk</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="outcome">
+            <div>
+              <small class="footnote" style="letter-spacing:.1em;text-transform:uppercase;">Comparative outcome</small>
+              <div class="before-after" style="margin-top:6px;">
+                <span>Baseline <strong>86</strong></span>
+                <span>&rarr;</span>
+                <span>Scenario <strong id="scenScore" style="color:var(--ok);">86</strong></span>
+              </div>
+            </div>
+            <div class="footnote" id="deltaNote" style="text-align:right;">Delta: 0 points</div>
+          </div>
+
+          <p class="footnote">* Simulated preview model for demonstration and planning purposes. It is not a validated engineering model.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. AI AGENTS ============ -->
+<section id="ai-agents" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">AI Agent Collaboration</span>
+      <h2>Specialist Agents. One Coordinated Survival Plan.</h2>
+      <p>Each agent evaluates a single domain. The coordination hub reconciles their findings into a ranked set of directives for the crew.</p>
+    </div>
+    <div class="agents">
+      <div class="agent-col">
+        <div class="agent">
+          <div class="agent-top"><div class="agent-name">&#9679; Water Agent</div><span class="sample-tag">Active</span></div>
+          <p>Evaluates reserves, consumption patterns, greywater purification rates, and active conservation protocols.</p>
+        </div>
+        <div class="agent">
+          <div class="agent-top"><div class="agent-name">&#9679; Agriculture Agent</div><span class="sample-tag">Active</span></div>
+          <p>Reviews crop health, photosynthetic efficiency, growing conditions, and nutritional production risks in Bio-Domes.</p>
+        </div>
+      </div>
+
+      <div class="hub">
+        <div class="hub-head"><span>Central hub &middot; Coordinated synthesis</span><span class="pill" style="padding:3px 8px;">Sample</span></div>
+        <h3>Coordinated Survival Plan</h3>
+        <div class="directive">
+          <div class="num">01</div>
+          <div><h4>Ration water delivery</h4><p>Reduce non-essential greywater use by 15% until purification rates recover.</p></div>
+        </div>
+        <div class="directive">
+          <div class="num">02</div>
+          <div><h4>Nocturnal irrigation</h4><p>Shift hydroponic irrigation to night cycles to reduce thermal load on the habitat.</p></div>
+        </div>
+        <div class="directive">
+          <div class="num">03</div>
+          <div><h4>Auxiliary load shedding</h4><p>Power down non-vital systems during peak solar-array shading windows.</p></div>
+        </div>
+        <div class="hub-foot"><span>Confidence: 0.82</span><span>Generated from sample data</span></div>
+      </div>
+
+      <div class="agent-col">
+        <div class="agent">
+          <div class="agent-top"><div class="agent-name">&#9679; Health Agent</div><span class="sample-tag">Active</span></div>
+          <p>Reviews astronaut biometrics, hydration levels, circadian rhythm stability, and acute nutritional indicators.</p>
+        </div>
+        <div class="agent">
+          <div class="agent-top"><div class="agent-name">&#9679; Energy Agent</div><span class="sample-tag">Active</span></div>
+          <p>Assesses storage cell degradation, solar orientation tracking, and opportunities to shed non-vital systems.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. SURVIVAL SCORE ============ -->
+<section id="survival-score" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="score-layout">
+      <div>
+        <span class="eyebrow">Comprehensive Readiness Index</span>
+        <h2>One Score. A Clearer View of Mission Readiness.</h2>
+        <p>SPACEHAB X combines hundreds of life-support telemetry metrics into one survival index, so teams can prioritise responses quickly.</p>
+
+        <div class="factors">
+          <div class="factor">
+            <div class="factor-head"><span>Closed-loop recovery cycle</span><span>82%</span></div>
+            <div class="bar"><span style="width:82%"></span></div>
+            <small>Water and air recycling efficiency</small>
+          </div>
+          <div class="factor">
+            <div class="factor-head"><span>180 sols dry buffer stored</span><span>91%</span></div>
+            <div class="bar"><span style="width:91%"></span></div>
+            <small>Non-perishable reserve coverage</small>
+          </div>
+          <div class="factor">
+            <div class="factor-head"><span>Solar array + fuel cell dual feed</span><span>78%</span></div>
+            <div class="bar"><span class="warn" style="width:78%"></span></div>
+            <small>Energy redundancy margin</small>
+          </div>
+          <div class="factor">
+            <div class="factor-head"><span>Cardiovascular &amp; O&#8322; sat nominal</span><span>94%</span></div>
+            <div class="bar"><span style="width:94%"></span></div>
+            <small>Crew physiological stability</small>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <div><small>Baseline</small><strong>86</strong></div>
+          <div><small>Filter fault</small><strong style="color:var(--warn);">79</strong></div>
+          <div><small>Recovery plan</small><strong style="color:var(--ok);">88</strong></div>
+        </div>
+        <p class="footnote" style="margin-top:16px;">DISCLAIMER: Prototype indicator based on configurable mission assumptions. It is not a certified measure of actual human survival probability.</p>
+      </div>
+
+      <div>
+        <svg class="hud" viewBox="0 0 360 360" aria-label="Survival score: 86 out of 100">
+          <circle cx="180" cy="180" r="150" fill="none" stroke="#1d2a46" stroke-width="2" stroke-dasharray="2 6"/>
+          <circle cx="180" cy="180" r="128" fill="none" stroke="#22304f" stroke-width="14"/>
+          <circle cx="180" cy="180" r="128" fill="none" stroke="#3fd0c9" stroke-width="14" stroke-linecap="round" transform="rotate(-90 180 180)" stroke-dasharray="692 804"/>
+          <text x="180" y="176" text-anchor="middle" fill="#e6edf7" font-size="56" font-weight="700">86</text>
+          <text x="180" y="204" text-anchor="middle" fill="#8fa0bf" font-size="12" letter-spacing="2">SURVIVAL SCORE</text>
+          <text x="180" y="236" text-anchor="middle" fill="#3ddc97" font-size="13">Stable &middot; Sample data</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. HOW IT WORKS ============ -->
+<section id="how-it-works" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Operational Workflow</span>
+      <h2>From Mission Data to an Adaptive Survival Plan.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="card">
+          <div class="icon">01</div>
+          <div class="step-num">STEP 1</div>
+          <h3>Monitor</h3>
+          <p>Continuously ingest multi-zone telemetry: environmental sensors, water reclamation centrifuges, hydroponic nutrition feeds, and crew biometrics.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="card">
+          <div class="icon">02</div>
+          <div class="step-num">STEP 2</div>
+          <h3>Detect</h3>
+          <p>Evaluate high-frequency data against dynamically calculated mission bounds to detect mechanical failures or consumption spikes quickly.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="card">
+          <div class="icon">03</div>
+          <div class="step-num">STEP 3</div>
+          <h3>Analyse</h3>
+          <p>Trace second- and third-order cascading impacts across linked biological and thermal life-support systems inside the digital twin.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="card">
+          <div class="icon">04</div>
+          <div class="step-num">STEP 4</div>
+          <h3>Adapt</h3>
+          <p>Generate and validate an optimised, multi-agent contingency plan that reallocates habitat margins and protects the crew for the rest of the mission.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. ALERTS & MISSION HISTORY ============ -->
+<section id="alerts" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="alerts-head">
+      <div class="section-head" style="margin-bottom:0;">
+        <span class="eyebrow">Alerts &amp; Mission History</span>
+        <h2>Active Alerts &amp; Event Log</h2>
+      </div>
+      <a href="#mission-data" class="btn">Submit a reading &rarr;</a>
+    </div>
+
+    <div class="alerts-grid">
+      <div>
+        <div class="panel-title"><span>Simulated Alert Feed</span><small>Sample data</small></div>
+        <div class="filters" role="group" aria-label="Filter alerts">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="crit">Critical</button>
+          <button class="filter-btn" data-filter="warn">Warning</button>
+          <button class="filter-btn" data-filter="info">Info</button>
+        </div>
+        <div id="alertFeed">
+          <div class="alert crit" data-sev="crit">
+            <div class="alert-top"><span class="sev crit">CRITICAL &middot; WATER</span><time>Sol 214 &middot; 08:12</time></div>
+            <p>Simulated water availability has fallen below the configured mission threshold (350 L/day).</p>
+          </div>
+          <div class="alert warn" data-sev="warn">
+            <div class="alert-top"><span class="sev warn">WARNING &middot; BIO-DOME 2</span><time>Sol 214 &middot; 06:40</time></div>
+            <p>Reduced irrigation may affect projected crop output in Bio-Dome 2.</p>
+          </div>
+          <div class="alert info" data-sev="info">
+            <div class="alert-top"><span class="sev info">INFO &middot; RESOURCE CONSERVATION</span><time>Sol 213 &middot; 22:05</time></div>
+            <p>An updated resource-conservation recommendation is available for review.</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-title"><span>Mission Event Log</span><small>Sample data</small></div>
+        <div class="card" style="padding:8px 20px;">
+          <div class="log-row"><time>Sol 214</time><span>Water threshold breach flagged by Water Agent.</span></div>
+          <div class="log-row"><time>Sol 213</time><span>Digital twin scenario &ldquo;Filter fault&rdquo; completed; score moved from 86 to 79.</span></div>
+          <div class="log-row"><time>Sol 211</time><span>Survival plan v3 approved by flight controllers.</span></div>
+          <div class="log-row"><time>Sol 208</time><span>Greenhouse yield review completed for Bio-Dome 2.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. SURVIVAL PLAN (anchor) & CREW HEALTH anchors ============ -->
+<section id="survival-plan" style="border-top:1px solid var(--border); padding:56px 0;">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Survival Plan Generator</span>
+      <h2>Corrective Protocols, Ready for Review.</h2>
+      <p>Protocols generated from the current simulation are listed below as sample output. Review each one before taking action on the habitat.</p>
+    </div>
+    <div class="bento" style="grid-template-columns:repeat(3,1fr);">
+      <div class="card"><h3>Protocol A: Water</h3><p>Reduce non-essential greywater use by 15% and prioritise hygiene and crop irrigation.</p></div>
+      <div class="card"><h3>Protocol B: Energy</h3><p>Stagger non-vital loads during shading windows to keep storage above the 60% margin.</p></div>
+      <div class="card" id="crew-health"><h3>Protocol C: Crew</h3><p>Increase biometric check frequency to every 4 hours while stress indicators remain elevated.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11. MISSION DATA ENTRY ============ -->
+<section id="mission-data" style="border-top:1px solid var(--border);">
+  <div class="container form-wrap">
+    <div class="form-side">
+      <span class="eyebrow">Mission Data Entry</span>
+      <h2>Submit a Mission Reading.</h2>
+      <p>Enter a resource reading and it will be sent to the SPACEHAB X mission data sheet. Use only real values for real missions. Readings entered here are stored as submitted.</p>
+      <ul>
+        <li><strong>Resource</strong><span>For example: water, oxygen, food, or energy.</span></li>
+        <li><strong>Current Value</strong><span>The measured or simulated value for that resource.</span></li>
+        <li><strong>Unit</strong><span>For example: litres, kilograms, or kWh.</span></li>
+      </ul>
+    </div>
+
+    <div class="form-card">
+      <form id="missionForm" novalidate>
+        <div class="field" id="fieldResource">
+          <label for="resource">Resource</label>
+          <input type="text" id="resource" name="resource" list="resourceList" placeholder="e.g. water" maxlength="50" autocomplete="off">
+          <datalist id="resourceList">
+            <option value="Water"></option>
+            <option value="Oxygen"></option>
+            <option value="Food"></option>
+            <option value="Energy"></option>
+          </datalist>
+          <small>Letters, spaces, and hyphens only.</small>
+          <div class="error-text">Enter a resource name (letters, spaces, or hyphens).</div>
+        </div>
+        <div class="field" id="fieldValue">
+          <label for="currentValue">Current Value</label>
+          <input type="number" id="currentValue" name="currentValue" placeholder="e.g. 1480" min="0" step="any">
+          <div class="error-text">Enter a non-negative number.</div>
+        </div>
+        <div class="field" id="fieldUnit">
+          <label for="unit">Unit</label>
+          <input type="text" id="unit" name="unit" placeholder="e.g. litres" maxlength="20" autocomplete="off">
+          <div class="error-text">Enter a unit (up to 20 characters).</div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="width:100%;">Submit Reading</button>
+        <div class="status-box" id="statusBox" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 12. FINAL CTA ============ -->
+<section class="cta">
+  <div class="container">
+    <span class="eyebrow">Ready When the Mission Is</span>
+    <h2>Plan Survival Before the Crisis Arrives.</h2>
+    <p>Explore the dashboard, test a scenario in the digital twin, or submit a reading to your mission data sheet.</p>
+    <div class="hero-actions">
+      <a href="#dashboard" class="btn btn-primary">Open Mission Dashboard &rarr;</a>
+      <a href="#mission-data" class="btn">Submit Mission Data</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="#overview" class="brand"><span class="logo">SX</span><span>SPACEHAB X</span></a>
+        <p>A space-habitat monitoring and survival-planning system for long-duration missions. Prototype using sample data.</p>
+      </div>
+      <div>
+        <h5>Architecture</h5>
+        <a href="#overview">Overview</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#digital-twin">Digital Twin</a>
+      </div>
+      <div>
+        <h5>Command</h5>
+        <a href="#dashboard">Dashboard</a>
+        <a href="#alerts">Mission Intel</a>
+        <a href="#survival-score">Survival Metrics</a>
+      </div>
+      <div>
+        <h5>Telemetry Node</h5>
+        <p style="margin:0 0 6px;font-size:13px;">UTC: Synchronised</p>
+        <p style="margin:0 0 6px;font-size:13px;">Zone: Horizon-180</p>
+        <p style="margin:0;font-size:13px;">Node: Orbital-Alpha</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 SPACEHAB X. Sample data shown for prototype purposes only.</span>
+      <span>Not for operational spacecraft control.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Apps Script endpoint (deployed web app URL) ---------- */
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJAH5o2YJIfJmoSVWMQ_QmTPletLkvY07v98o_3264JUlt26g1kvMo6pKb6C4OKLTn/exec";
+
+  /* ---------- Mobile navigation ---------- */
+  var menuToggle = document.getElementById("menuToggle");
+  var navLinks = document.getElementById("navLinks");
+  menuToggle.addEventListener("click", function () {
+    var open = navLinks.classList.toggle("open");
+    menuToggle.setAttribute("aria-expanded", String(open));
+  });
+  navLinks.querySelectorAll("a").forEach(function (a) {
+    a.addEventListener("click", function () {
+      navLinks.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  /* Highlight the nav link for the section in view */
+  var sectionIds = ["overview", "capabilities", "digital-twin", "ai-agents", "survival-score", "how-it-works", "alerts", "mission-data"];
+  var navAnchors = navLinks.querySelectorAll("a");
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          navAnchors.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: "-40% 0px -55% 0px" });
+    sectionIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  }
+
+  /* ---------- Alert filters ---------- */
+  document.querySelectorAll(".filter-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".filter-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      var f = btn.getAttribute("data-filter");
+      document.querySelectorAll("#alertFeed .alert").forEach(function (item) {
+        item.style.display = (f === "all" || item.getAttribute("data-sev") === f) ? "" : "none";
+      });
+    });
+  });
+
+  /* ---------- Digital twin simulation (sample model, not validated) ---------- */
+  var water = document.getElementById("waterSlider");
+  var solar = document.getElementById("solarSlider");
+  var filter = document.getElementById("filterSlider");
+
+  function updateTwin() {
+    var w = Number(water.value), s = Number(solar.value), f = Number(filter.value);
+    document.getElementById("waterVal").textContent = w + "%";
+    document.getElementById("solarVal").textContent = s + " h";
+    document.getElementById("filterVal").textContent = f + "%";
+
+    var hydro = Math.max(0, 100 - w * 0.7 - f * 0.4);
+    var food = Math.max(0, 100 - w * 0.5 - s * 0.6 - f * 0.3);
+    var stress = Math.min(100, 10 + s * 0.8 + w * 0.3);
+    var energyLow = s > 12;
+
+    document.getElementById("mHydro").textContent = Math.round(hydro) + "%";
+    document.getElementById("mFood").textContent = Math.round(food) + "%";
+    document.getElementById("mStress").textContent = stress < 30 ? "Low" : stress < 60 ? "Elevated" : "High";
+    document.getElementById("mEnergy").textContent = energyLow ? "Strained" : "Stable";
+
+    var root = w > 0 ? "Water delivery" : f > 0 ? "Filter degradation" : s > 0 ? "Solar blackout" : "Baseline";
+    document.getElementById("rootLabel").textContent = root;
+    document.getElementById("rootDelta").textContent = w > 0 ? "-" + w + "%" : f > 0 ? "-" + f + "%" : s > 0 ? s + " h" : "0%";
+    document.getElementById("imp1").textContent = "-" + Math.round(100 - hydro) + "% yield";
+    document.getElementById("imp2").textContent = "-" + Math.round((100 - food) * 0.6) + "% days";
+    document.getElementById("imp3").textContent = "+" + Math.round(stress - 10) + "% risk";
+
+    var score = Math.round(Math.max(0, 86 - (100 - hydro) * 0.15 - (100 - food) * 0.2 - Math.max(0, stress - 10) * 0.1));
+    document.getElementById("scenScore").textContent = score;
+    var delta = score - 86;
+    document.getElementById("deltaNote").textContent = "Delta: " + (delta >= 0 ? "+" : "") + delta + " points";
+    document.getElementById("scenScore").style.color = delta < -5 ? "var(--crit)" : delta < 0 ? "var(--warn)" : "var(--ok)";
+  }
+
+  [water, solar, filter].forEach(function (el) { el.addEventListener("input", updateTwin); });
+  document.getElementById("resetTwin").addEventListener("click", function () {
+    water.value = 0; solar.value = 0; filter.value = 0; updateTwin();
+  });
+  updateTwin();
+
+  /* ---------- Mission data form (Google Apps Script, no-cors GET) ---------- */
+  var form = document.getElementById("missionForm");
+  var resourceInput = document.getElementById("resource");
+  var valueInput = document.getElementById("currentValue");
+  var unitInput = document.getElementById("unit");
+  var submitBtn = document.getElementById("submitBtn");
+  var statusBox = document.getElementById("statusBox");
+
+  function setInvalid(fieldId, invalid) {
+    document.getElementById(fieldId).classList.toggle("invalid", invalid);
+  }
+
+  function validate() {
+    var resource = resourceInput.value.trim();
+    var value = valueInput.value.trim();
+    var unit = unitInput.value.trim();
+    var ok = true;
+
+    var resourceOk = resource.length > 0 && resource.length <= 50 && /^[A-Za-z][A-Za-z \-]*$/.test(resource);
+    setInvalid("fieldResource", !resourceOk); ok = ok && resourceOk;
+
+    var valueOk = value !== "" && isFinite(Number(value)) && Number(value) >= 0;
+    setInvalid("fieldValue", !valueOk); ok = ok && valueOk;
+
+    var unitOk = unit.length > 0 && unit.length <= 20;
+    setInvalid("fieldUnit", !unitOk); ok = ok && unitOk;
+
+    return ok;
+  }
+
+  function showStatus(type, message) {
+    statusBox.className = "status-box show " + type;
+    statusBox.textContent = message;
+  }
+
+  function showSuccess() {
+    showStatus("success", "Reading sent to the mission data sheet. The website cannot confirm the save from here, so check the MissionData tab to verify it was recorded.");
+    form.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit Reading";
+  }
+
+  function showError() {
+    showStatus("error", "The reading could not be sent. Check your connection and try again.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit Reading";
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!validate()) {
+      showStatus("error", "Please correct the highlighted fields.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+    showStatus("sending", "Sending reading...");
+
+    var params = new URLSearchParams({
+      resource: resourceInput.value.trim(),
+      currentValue: valueInput.value.trim(),
+      unit: unitInput.value.trim()
+    });
+    var url = SCRIPT_URL + "?" + params.toString();
+
+    fetch(url, { method: "GET", mode: "no-cors" })
+      .then(function () { showSuccess(); })
+      .catch(function () { showError(); });
+  });
+})();
+</script>
+</body>
+</html>
